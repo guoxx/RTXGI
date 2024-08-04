@@ -525,7 +525,9 @@ void PathTraceRays()
         NrcSetSampleIndex(nrcContext, sampleIndex);
 
 #if SHARC_UPDATE
-        SharcInit(sharcState);
+        SharcPathPayload sharcPayload;
+
+        SharcPayloadInit(sharcPayload);
 #endif // SHARC_UPDATE
 
         float2 pixel = float2(launchIndex);
@@ -585,7 +587,7 @@ void PathTraceRays()
             {
                 float3 skyValue = g_Lighting.skyColor.rgb;
 #if SHARC_UPDATE
-                SharcUpdateMiss(sharcState, skyValue);
+                SharcUpdateMiss(sharcPayload, sharcState, skyValue);
 #endif // SHARC_UPDATE
 
                 NrcUpdateOnMiss(nrcPathState);
@@ -747,7 +749,7 @@ void PathTraceRays()
                 break;
 
 #if SHARC_UPDATE
-            if (!SharcUpdateHit(sharcState, sharcHitData, sampleRadiance, Rand(rngState)))
+            if (!SharcUpdateHit(sharcPayload, sharcState, sharcHitData, sampleRadiance, Rand(rngState)))
                 break;
 #endif // SHARC_UPDATE
 
@@ -873,7 +875,7 @@ void PathTraceRays()
             throughput *= brdfWeight;
 
 #if SHARC_UPDATE
-            SharcSetThroughput(sharcState, throughput);
+            SharcPayloadSetThroughput(sharcPayload, throughput);
 #else // !SHARC_UPDATE
             if (luminance(throughput) < g_Global.throughputThreshold)
                 break;
